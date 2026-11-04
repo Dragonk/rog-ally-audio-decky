@@ -1,10 +1,10 @@
 # ROG Ally Audio for Decky Loader
 
-[![CI](https://github.com/Dragonk/rog-ally-audio-decky/actions/workflows/ci.yml/badge.svg)](https://github.com/Dragonk/rog-ally-audio-decky/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Dragonk/rog-ally-audio-decky)](https://github.com/Dragonk/rog-ally-audio-decky/releases)
+[![CI](https://github.com/Dragonk/ROGAllyAudio/actions/workflows/ci.yml/badge.svg)](https://github.com/Dragonk/ROGAllyAudio/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Dragonk/ROGAllyAudio)](https://github.com/Dragonk/ROGAllyAudio/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A Decky Loader plugin that gives the **ASUS ROG Xbox Ally X (RC73XA)** a persistent EasyEffects speaker-processing chain in SteamOS Gaming Mode, with quick profile switching directly from the Quick Access Menu.
+A Decky Loader plugin that gives the **ASUS ROG Xbox Ally X (RC73XA)** a persistent EasyEffects speaker-processing chain in SteamOS, with quick profile switching directly from the Quick Access Menu.
 
 > [!IMPORTANT]
 > v0.1 is intentionally limited to **ROG Xbox Ally X / RC73XA**. The presets were tuned and real-device tested for this model. They are not ASUS/Dolby OEM profiles and should not be treated as suitable for other handhelds.
@@ -53,17 +53,58 @@ The plugin checks DMI model identifiers before enabling the runtime. The detecte
 
 ## Installation
 
-### GitHub release
+### One-command installer (auto KDE tray + Gaming Mode) — recommended
+
+The installer script does everything the plugin needs and then verifies the whole chain end-to-end. It works on SteamOS in both KDE Desktop Mode and Gaming Mode and switches the EasyEffects lifecycle between them automatically afterwards.
+
+Prerequisites:
+
+- ASUS ROG Xbox Ally X (RC73XA) running SteamOS.
+- Decky Loader installed.
+- EasyEffects Flatpak — install it once from KDE Desktop Mode if you do not have it:
+
+  ```bash
+  flatpak install -y flathub com.github.wwmm.easyeffects
+  ```
+
+Run in KDE Desktop Mode (Konsole) or over SSH:
+
+```bash
+cd ~/Downloads
+curl -LO https://github.com/Dragonk/ROGAllyAudio/releases/latest/download/install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
+chmod +x install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
+./install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
+```
+
+The script asks for the sudo password once and performs nine verified steps:
+
+1. **Backup** — existing plugin, runtime data, config and user systemd units are copied to a timestamped backup directory.
+2. **Verify plugin** — the embedded plugin ZIP is checked against a hard-coded SHA-256, then the Python runtime is compiled and the shell script syntax-checked before anything is installed.
+3. **Install the plugin** — the plugin is placed in `/home/deck/homebrew/plugins/ROGAllyAudio` (Decky is stopped and restarted around the change).
+4. **Bootstrap the runtime** — presets, configuration and all four `decky-rog-ally-audio-*` user systemd units are set up through the plugin's own `RuntimeManager`.
+5. **Restart Decky.**
+6. **Session handoff** — the script detects the current session (Plasma vs Gaming Mode) and waits until the session manager reports `phase=ready` with the correct EasyEffects instance (KDE Wayland app in Desktop Mode, headless service in Gaming Mode).
+7. **DSP verification** — controller state, EasyEffects server, active streams and the expected DSP chain (or confirmed Bypass) are checked against `status.json`.
+8. **KDE tray verification** — in Desktop Mode it confirms the Flatpak override for `org.kde.StatusNotifierWatcher` and that EasyEffects actually registered a tray item with Plasma (queried per item, not by counting icons).
+9. **Survival test** — all services are re-checked after Decky has fully started.
+
+On any failure the script prints a complete diagnostic dump: systemd status of every unit, `session.json`/`status.json`, EasyEffects dconf settings, Flatpak overrides and the tray watcher state. After it finishes with `GOTOWE`, switching between Desktop Mode and Gaming Mode (and rebooting) requires no manual action — never start EasyEffects yourself.
+
+Upgrading to a newer version: re-run the matching installer script; it refreshes the plugin and runtime in the same way and keeps a new backup.
+
+### Manual install from the GitHub release
+
+If you prefer to install only the plugin and let its own **Install EasyEffects and configure** button do the runtime setup:
 
 1. Install Decky Loader.
 2. In Decky settings, enable **Developer Mode**.
 3. Open **Developer → Install Plugin from URL** and use the latest-release asset:
-   `https://github.com/Dragonk/rog-ally-audio-decky/releases/latest/download/ROGAllyAudio.zip`
+   `https://github.com/Dragonk/ROGAllyAudio/releases/latest/download/ROGAllyAudio.zip`
    (or download the versioned ZIP and use **Install Plugin from ZIP**).
 4. Open **ROG Ally Audio** in Quick Access.
 5. If EasyEffects is missing, choose **Install EasyEffects and configure**.
 
-If EasyEffects is already installed, setup is automatic.
+If EasyEffects is already installed, setup is automatic. The manual path installs the same systemd units; the KDE tray/Gaming Mode handoff works identically after the in-plugin setup.
 
 ### What setup changes
 
@@ -72,6 +113,8 @@ The plugin creates only user-owned files:
 - `~/.config/rog-ally-audio/`
 - `~/.local/share/decky-rog-ally-audio/`
 - `~/.config/systemd/user/decky-rog-ally-audio-easyeffects.service`
+- `~/.config/systemd/user/decky-rog-ally-audio-easyeffects-kde.service`
+- `~/.config/systemd/user/decky-rog-ally-audio-session.service`
 - `~/.config/systemd/user/decky-rog-ally-audio-controller.service`
 - EasyEffects output presets under its Flatpak user data directory.
 
