@@ -6,7 +6,7 @@ import {
 } from "@decky/ui";
 import { callable, definePlugin, toaster } from "@decky/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaVolumeHigh } from "react-icons/fa";
+import { FaVolumeHigh } from "react-icons/fa6";
 
 type Mode = "auto" | "balanced" | "cinema" | "loud" | "bypass";
 
