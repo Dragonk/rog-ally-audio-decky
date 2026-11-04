@@ -1,0 +1,17 @@
+[Unit]
+Description=Persistent EasyEffects Gaming Mode runtime for ROG Ally Audio
+After=pipewire.service pipewire-pulse.service
+Wants=pipewire.service pipewire-pulse.service
+
+[Service]
+Type=simple
+Environment=HOME=/home/deck
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/usr/bin/flatpak run --env=QT_QPA_PLATFORM=offscreen --command=easyeffects com.github.wwmm.easyeffects --service-mode --hide-window
+ExecStop=-/usr/bin/flatpak kill com.github.wwmm.easyeffects
+Restart=always
+RestartSec=2
+TimeoutStopSec=10
+
+# Deliberately no [Install] section; session manager owns this service.

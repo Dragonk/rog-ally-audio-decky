@@ -1,0 +1,13 @@
+[Unit]
+Description=ROG Ally Audio profile controller
+After=pipewire-pulse.service decky-rog-ally-audio-session.service
+Wants=pipewire-pulse.service decky-rog-ally-audio-session.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/decky-rog-ally-audio/controller.py
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,11 @@
+{
+  "name": "ROG Ally Audio",
+  "author": "Kamil Maciąg",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["audio", "easyeffects", "rog-ally", "steam-os"],
+    "description": "Speaker tuning and persistent EasyEffects profiles for ASUS ROG Xbox Ally X (RC73XA).",
+    "image": "https://raw.githubusercontent.com/Dragonk/rog-ally-audio-decky/main/assets/thumbnail.png"
+  }
+}
