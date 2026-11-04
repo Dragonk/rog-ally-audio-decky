@@ -60,30 +60,32 @@ The installer script does everything the plugin needs and then verifies the whol
 Prerequisites:
 
 - ASUS ROG Xbox Ally X (RC73XA) running SteamOS.
-- Decky Loader installed.
-- EasyEffects Flatpak — install it once from KDE Desktop Mode if you do not have it:
+- Decky Loader installed (the script stops and restarts its `plugin_loader` service).
+- Network access if EasyEffects is not installed yet — the script installs the Flatpak from Flathub automatically.
+- EasyEffects Flatpak — installed by the script when missing (no manual setup needed):
 
   ```bash
+  # only if you prefer to pre-install it yourself
   flatpak install -y flathub com.github.wwmm.easyeffects
   ```
 
-Run in KDE Desktop Mode (Konsole) or over SSH:
+Run it from **KDE Desktop Mode** in Konsole (Gaming Mode has no terminal; SSH as `deck` works too). Do **not** run it with `sudo`:
 
 ```bash
-cd ~/Downloads
+cd ~
 curl -LO https://github.com/Dragonk/ROGAllyAudio/releases/latest/download/install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
 chmod +x install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
 ./install-ROG-Ally-Audio-0.1.11-auto-kde-tray.sh
 ```
 
-The script asks for the sudo password once and performs nine verified steps:
+The script asks for the sudo password once (Decky restart) and performs nine verified steps:
 
 1. **Backup** — existing plugin, runtime data, config and user systemd units are copied to a timestamped backup directory.
-2. **Verify plugin** — the embedded plugin ZIP is checked against a hard-coded SHA-256, then the Python runtime is compiled and the shell script syntax-checked before anything is installed.
-3. **Install the plugin** — the plugin is placed in `/home/deck/homebrew/plugins/ROGAllyAudio` (Decky is stopped and restarted around the change).
-4. **Bootstrap the runtime** — presets, configuration and all four `decky-rog-ally-audio-*` user systemd units are set up through the plugin's own `RuntimeManager`.
+2. **Verify plugin** — the embedded plugin ZIP is checked against a hard-coded SHA-256, the Python runtime is compiled and the shell script syntax-checked before anything is installed.
+3. **Install the plugin** — the plugin is placed in `/home/deck/homebrew/plugins/ROGAllyAudio` (Decky is stopped first and is always restarted again, even if the script aborts).
+4. **Bootstrap the runtime** — if EasyEffects is missing it is installed from Flathub first; then presets, configuration and all four `decky-rog-ally-audio-*` user systemd units are set up through the plugin's own `RuntimeManager`.
 5. **Restart Decky.**
-6. **Session handoff** — the script detects the current session (Plasma vs Gaming Mode) and waits until the session manager reports `phase=ready` with the correct EasyEffects instance (KDE Wayland app in Desktop Mode, headless service in Gaming Mode).
+6. **Session handoff** — the script detects the current session (Plasma vs Gaming Mode) and waits up to 60 s until the session manager reports `phase=ready` with the correct EasyEffects instance (KDE Wayland app in Desktop Mode, headless service in Gaming Mode).
 7. **DSP verification** — controller state, EasyEffects server, active streams and the expected DSP chain (or confirmed Bypass) are checked against `status.json`.
 8. **KDE tray verification** — in Desktop Mode it confirms the Flatpak override for `org.kde.StatusNotifierWatcher` and that EasyEffects actually registered a tray item with Plasma (queried per item, not by counting icons).
 9. **Survival test** — all services are re-checked after Decky has fully started.
