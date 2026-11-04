@@ -7,7 +7,7 @@
 A Decky Loader plugin that gives the **ASUS ROG Xbox Ally X (RC73XA)** a persistent EasyEffects speaker-processing chain in SteamOS, with quick profile switching directly from the Quick Access Menu.
 
 > [!IMPORTANT]
-> v0.1 is intentionally limited to **ROG Xbox Ally X / RC73XA**. The presets were tuned and real-device tested for this model. They are not ASUS/Dolby OEM profiles and should not be treated as suitable for other handhelds.
+> v0.1 is intentionally limited to **ROG Xbox Ally X / RC73XA**. The presets were tuned and real-device tested for this model on SteamOS 3.8.x and 3.9.5. They are not ASUS/Dolby OEM profiles and should not be treated as suitable for other handhelds.
 
 ## Automatic KDE / Gaming Mode integration
 
@@ -247,7 +247,7 @@ The release ZIP is written to `build/`.
 Initial v0.1 development was real-device tested on:
 
 - ASUS ROG Xbox Ally X (RC73XA)
-- SteamOS 3.8.x
+- SteamOS 3.8.x and 3.9.5
 - ALC294 / ASUS subsystem 1043:1384
 - TAS2781 smart amplifiers bound by the kernel driver
 - PipeWire 1.6.x
